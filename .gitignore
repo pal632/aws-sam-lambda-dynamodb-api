@@ -1,5 +1,5 @@
 /.aws-sam/
 /samconfig.toml
 /.idea/
-/PutUserFunction/.idea/
-/PutUserFunction/.gradle/
+/LambdaFunctions/.idea/
+/LambdaFunctions/.gradle/

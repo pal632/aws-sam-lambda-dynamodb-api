@@ -33,7 +33,7 @@ Resources:
   PutUserFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: PutUserFunction
+      CodeUri: LambdaFunctions
       Handler: com.prannav.learning.aws.funtion.PutUserFunctionAPIGateway::handleRequest
       Runtime: java8
       MemorySize: 256
@@ -50,6 +50,33 @@ Resources:
           Properties:
             Path: /user
             Method: post
+            RestApiId:
+              Ref: UserAPIGateway
+  GetUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: LambdaFunctions
+      Handler: com.prannav.learning.aws.funtion.GetUserFunctionAPIGateway::handleRequest
+      Runtime: java8
+      MemorySize: 256
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref UserTable
+          REGION_NAME: !Ref AWS::Region
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserTable
+      Events:
+        AddUser:
+          Type: Api
+          Properties:
+            Path: /user
+            Method: get
+            RequestParameters:
+              - method.request.querystring.userId:
+                  Required: true
+                  Caching: false
+
             RestApiId:
               Ref: UserAPIGateway
   # Refer https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-simpletable.html
