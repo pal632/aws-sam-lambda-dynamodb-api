@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: My First Serverless Application Model
+
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  # Refer https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-api.html
+  UserAPIGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Models:
+        UserData:
+          type: object
+          required:
+            - firstName
+            - lastName
+          properties:
+            userId:
+              type: string
+            firstName:
+              type: string
+            lastName:
+              type: string
+            age:
+              type: number
+            active:
+              type: boolean
+  # Refer https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+  PutUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: PutUserFunction
+      Handler: com.prannav.learning.aws.funtion.PutUserFunctionAPIGateway::handleRequest
+      Runtime: java8
+      MemorySize: 256
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref UserTable
+          REGION_NAME: !Ref AWS::Region
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserTable
+      Events:
+        AddUser:
+          Type: Api
+          Properties:
+            Path: /user
+            Method: post
+            RestApiId:
+              Ref: UserAPIGateway
+  # Refer https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-simpletable.html
+  UserTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: userId
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
